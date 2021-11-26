@@ -1,0 +1,21 @@
+Sistema de Colas U/U/1
+
+a1      0.000000
+
+b1      0.173000
+
+a2      0.002000
+
+b2      0.096000
+
+Numero de clientes          1000
+
+
+
+Espera promedio en la cola      0.018 minutos
+
+Numero promedio en cola     0.207
+
+Uso del servidor          0.565
+
+Tiempo de terminacion de la simulacion      88.091 minutos

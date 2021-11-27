@@ -1,21 +1,17 @@
-Sistema de Colas U/U/1
+Sistema de Colas M/M/1
 
-a1      0.000000
+Tiempo promedio de llegada      0.086 minutos
 
-b1      0.173000
-
-a2      0.002000
-
-b2      0.096000
+Tiempo promedio de atencion           0.049 minutos
 
 Numero de clientes          1000
 
 
 
-Espera promedio en la cola      0.018 minutos
+Espera promedio en la cola      0.070 minutos
 
-Numero promedio en cola     0.207
+Numero promedio en cola     0.803
 
-Uso del servidor          0.565
+Uso del servidor          0.544
 
-Tiempo de terminacion de la simulacion      88.091 minutos
+Tiempo de terminacion de la simulacion      86.868 minutos

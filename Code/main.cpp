@@ -1,4 +1,4 @@
-// Definiciones externas para el sistema de colas simple 
+// Definiciones externas para el sistema de colas simple
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -16,9 +16,9 @@ int     sig_tipo_evento,
         num_esperas_requerido,
         num_eventos,
         num_entra_cola,
+        num_servidores,
         estado_servidor,
-        modo_operacion,
-        n;
+        modo_operacion;
 
 float   area_num_entra_cola,
         area_estado_servidor,
@@ -93,7 +93,16 @@ void inicializar(void)  // Funcion de inicializacion.
     num_eventos = 2;
 
     // Lectura de los parámetros de entrada
-    fscanf(parametros, "%f %f %d %i %f %f %f %f %i", &media_entre_llegadas, &media_atencion, &num_esperas_requerido, &modo_operacion, &a1, &b1, &a2, &b2, &n);
+    fscanf(parametros, "%f %f %d %i %f %f %f %f %i",
+            &media_entre_llegadas,
+            &media_atencion,
+            &num_esperas_requerido,
+            &modo_operacion,
+            &a1,
+            &b1,
+            &a2,
+            &b2,
+            &num_servidores);
     
     // Print de datos según Modo de Operación
     switch(modo_operacion){
@@ -119,7 +128,7 @@ void inicializar(void)  // Funcion de inicializacion.
             fprintf(resultados, "Sistema de Colas M/M/n\n\n");
             fprintf(resultados, "Tiempo promedio de llegada%11.3f minutos\n\n", media_entre_llegadas);
             fprintf(resultados, "Tiempo promedio de atencion%16.3f minutos\n\n", media_atencion);
-            fprintf(resultados, "n%14i\n\n", n);
+            fprintf(resultados, "Numero de servidores%14i\n\n", num_servidores);
         break;
     };
 
@@ -129,7 +138,7 @@ void inicializar(void)  // Funcion de inicializacion.
     tiempo_simulacion = 0.0;
 
     // Inicializa las variables de estado
-    estado_servidor   = LIBRE;
+    estado_servidor   = 0;
     num_entra_cola        = 0;
     tiempo_ultimo_evento = 0.0;
 
@@ -143,12 +152,15 @@ void inicializar(void)  // Funcion de inicializacion.
     // Ya que no hay clientes, el evento salida (terminacion del servicio) no se tiene en cuenta
     switch(modo_operacion){
         case 1: // Modo M/M/1
+            num_servidores = 1;
             tiempo_sig_evento[1] = tiempo_simulacion + expon(media_entre_llegadas);
         break;
         case 2: // Modo U/M/1
+            num_servidores = 1;
             tiempo_sig_evento[1] = tiempo_simulacion + uniform(a1,b1);
         break;
         case 3: // Modo U/U/1
+            num_servidores = 1;
             tiempo_sig_evento[1] = tiempo_simulacion + uniform(a1,b1);
         break;
         case 4: // Modo M/M/n
@@ -211,7 +223,8 @@ void llegada(void)  // Funcion de llegada
     };
 
     // Revisa si el servidor esta OCUPADO.
-    if (estado_servidor == OCUPADO) {
+    // if (estado_servidor == OCUPADO) {
+    if (estado_servidor >= num_servidores) {
 
         // Servidor OCUPADO, aumenta el numero de clientes en cola
         ++num_entra_cola;
@@ -239,7 +252,10 @@ void llegada(void)  // Funcion de llegada
 
         // Incrementa el numero de clientes en espera, y pasa el servidor a ocupado 
         ++num_clientes_espera;
-        estado_servidor = OCUPADO;
+        // estado_servidor = OCUPADO;
+        if (estado_servidor < num_servidores) {
+            estado_servidor = estado_servidor + 1;
+        }
 
         // Programa una salida (servicio terminado).
         switch(modo_operacion){
@@ -270,7 +286,10 @@ void salida(void)  // Funcion de Salida.
     if (num_entra_cola == 0) {
 
         // La cola esta vacia, pasa el servidor a LIBRE y no considera el evento de salida
-        estado_servidor = LIBRE;
+        // estado_servidor = LIBRE;
+        if (estado_servidor > 0) {
+            estado_servidor = estado_servidor - 1;
+        }
         tiempo_sig_evento[2] = 1.0e+30;
     }
 
@@ -326,10 +345,10 @@ void actualizar_estad_prom_tiempo(void)  // Actualiza los acumuladores de área 
 
     // Calcula el tiempo desde el ultimo evento, y actualiza el marcador del ultimo evento.
     time_since_last_event = tiempo_simulacion - tiempo_ultimo_evento;
-    tiempo_ultimo_evento       = tiempo_simulacion;
+    tiempo_ultimo_evento = tiempo_simulacion;
 
     // Actualiza el area bajo la funcion de numero_en_cola
-    area_num_entra_cola      += num_entra_cola * time_since_last_event;
+    area_num_entra_cola += num_entra_cola * time_since_last_event;
 
     //Actualiza el area bajo la funcion indicadora de servidor ocupado
     area_estado_servidor += estado_servidor * time_since_last_event;
